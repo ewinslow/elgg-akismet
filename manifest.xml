@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin_manifest>
+        <field key="author" value="Marcus Povey (marcus@dushka.co.uk)" />
+        <field key="version" value="1.0" />
+        <field key="description" value="Basic Akismet spam filtering plugin." />
+        <field key="website" value="http://www.marcus-povey.co.uk" />
+        <field key="copyright" value="(C) Marcus Povey 2010" />
+		<field key="licence" value="GNU Public License version 2" />
+        <field key="elgg_version" value="2009072201" />
+</plugin_manifest>
