@@ -12,7 +12,7 @@ function akismet_init() {
 	elgg_register_event_handler('create', 'object', 'akismet_object_handler');
 }
 
-function akismet_annotation_handler($event, $object_type, $object) {
+function akismet_annotation_handler($event, $object_type, ElggAnnotation $object) {
 	if (($object) && ($object->name == 'generic_comment' || $object->name == 'messageboard')) {
 		$comment = $object->value;
 		$author = "";
@@ -33,7 +33,7 @@ function akismet_annotation_handler($event, $object_type, $object) {
 	}
 }
 
-function akismet_object_handler($event, $object_type, $object) {
+function akismet_object_handler($event, $object_type, ElggObject $object) {
 	if ($object) {
 		$comment = $object->description;
 		$author = "";
@@ -48,10 +48,8 @@ function akismet_object_handler($event, $object_type, $object) {
 		}
 
 		if (akismet_scan($comment, $author, $author_email, $author_url)) {
-			// @todo flag as spam, don't just delete
 			register_error(elgg_echo('akismet:spam'));
-
-			return false;
+			$object->disable('spam');
 		}
 	}
 }
