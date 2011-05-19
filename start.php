@@ -10,31 +10,7 @@ function akismet_init() {
 	// Only filter if the plugin has been set up
 	if (elgg_get_plugin_setting('api_key', 'akismet')) {
 		elgg_delete_admin_notice('akismet_key');
-		elgg_register_event_handler('create', 'annotation', 'akismet_annotation_handler');
 		elgg_register_event_handler('create', 'object', 'akismet_object_handler');
-	}
-}
-
-function akismet_annotation_handler($event, $object_type, ElggAnnotation $object) {
-	if (($object) && ($object->name == 'generic_comment' || $object->name == 'messageboard')) {
-		$comment = $object->value;
-		$author = "";
-		$author_email = "";
-		$author_url = "";
-		$owner = get_entity($object->owner_guid);
-		if ($owner) {
-			$author = $owner->name;
-			$author_email = $owner->email;
-			$author_url = $owner->website;
-		}
-
-		if (akismet_scan($comment, $author, $author_email, $author_url)) {
-			register_error(elgg_echo('akismet:spam'));
-
-			return false;
-		} else {
-			system_message(elgg_echo('akismet:ham'));
-		}
 	}
 }
 
