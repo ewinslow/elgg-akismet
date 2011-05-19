@@ -14,7 +14,7 @@
 	
 	<screenshot>
 		<description>Spam example</description>
-		<path>screenshots/submitting-spam</path>
+		<path>screenshots/submitting-spam.png</path>
 	</screenshot>
 	<screenshot>
 		<description>Spam getting pwned</description>
