@@ -31,8 +31,6 @@ function akismet_object_handler($event, $object_type, ElggObject $object) {
 		if (akismet_scan($comment, $author, $author_email, $author_url)) {
 			register_error(elgg_echo('akismet:spam'));
 			$object->disable('spam');
-		} else {
-			system_message(elgg_echo('akismet:ham'));
 		}
 	}
 }
