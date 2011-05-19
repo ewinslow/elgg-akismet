@@ -2,7 +2,7 @@
 <plugin_manifest xmlns="http://www.elgg.org/plugin_manifest/1.8">
 	<name>Akismet</name>
 	<author>Evan Winslow (evan@elgg.org)</author>
-	<version>1.1</version>
+	<version>1.1b</version>
 	<description>Eliminates spam using Akismet.</description>
 	<website>http://github.com/ewinslow/elgg-akismet</website>
 	<copyright>(C) Evan Winslow 2011</copyright>
