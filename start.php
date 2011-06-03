@@ -11,30 +11,34 @@ function akismet_init() {
 	if (elgg_get_plugin_setting('api_key', 'akismet')) {
 		elgg_delete_admin_notice('akismet_key');
 		elgg_register_event_handler('create', 'object', 'akismet_object_handler');
+		elgg_register_event_handler('update', 'user', 'akismet_user_handler');
+		elgg_register_event_handler('create', 'annotation', 'akismet_annotation_handler');
+	}
+}
+
+function akismet_user_handler($event, $type, ElggUser $user) {
+	$fields = array($user->briefdescription, $user->description);
+	
+	foreach ($fields as $field) {
+		akismet_filter($user, $field, $user);
 	}
 }
 
 function akismet_object_handler($event, $object_type, ElggObject $object) {
-	if ($object) {
-		$comment = $object->description;
-		$author = "";
-		$author_email = "";
-		$author_url = "";
-		$owner = get_entity($object->owner_guid);
+	akismet_filter($object, $object->description, $object->getOwnerEntity());
+}
 
-		if ($owner) {
-			$author = $owner->name;
-			$author_email = $owner->email;
-			$author_url = $owner->website;
-		}
+function akismet_annotation_handler($event, $type, ElggAnnotation $annotation) {
+	akismet_filter($annotation, $annotation->value, $annotation->getOwnerEntity());
+}
 
-		if (akismet_scan($comment, $author, $author_email, $author_url)) {
-			register_error(elgg_echo('akismet:spam'));
-			$object->disable('spam');
-			
-			//bail on the current action + return to previous page seems to make the most sense here...
-			forward(REFERER);
-		}
+function akismet_filter($object, $content, $owner) {
+	if (akismet_scan($content, $owner->name, $owner->email, $owner->website, $object->getURL())) {
+		register_error(elgg_echo('akismet:spam'));
+		$object->disable('spam');
+		
+		//bail on the current action + return to previous page seems to make the most sense here...
+		forward(REFERER);
 	}
 }
 
