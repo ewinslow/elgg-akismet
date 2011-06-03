@@ -36,6 +36,7 @@ function akismet_filter($object, $content, $owner) {
 	if (akismet_scan($content, $owner->name, $owner->email, $owner->website, $object->getURL())) {
 		register_error(elgg_echo('akismet:spam'));
 		$object->disable('spam');
+		$owner->ban('spam');
 		
 		//bail on the current action + return to previous page seems to make the most sense here...
 		forward(REFERER);
