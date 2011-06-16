@@ -4,15 +4,13 @@
  */
 
 function akismet_init() {
-	// Register for autoloading
-	elgg_register_class('Akismet', dirname(__FILE__) . "/vendors/akismet/PHP5Akismet.0.4/Akismet.class.php");
+	require dirname(__FILE__) . "/vendors/akismet/PHP5Akismet.0.4/Akismet.class.php";
 
-	// Only filter if the plugin has been set up
-	if (elgg_get_plugin_setting('api_key', 'akismet')) {
-		elgg_delete_admin_notice('akismet_key');
-		elgg_register_event_handler('create', 'object', 'akismet_object_handler');
-		elgg_register_event_handler('update', 'user', 'akismet_user_handler');
-		elgg_register_event_handler('create', 'annotation', 'akismet_annotation_handler');
+	// Only filter if the plugin has been set up and we're not an admin user
+	if (get_plugin_setting('api_key', 'akismet') && !isadminloggedin()) {
+		register_elgg_event_handler('create', 'object', 'akismet_object_handler');
+		register_elgg_event_handler('update', 'user', 'akismet_user_handler');
+		register_elgg_event_handler('create', 'annotation', 'akismet_annotation_handler');
 	}
 }
 
@@ -55,13 +53,14 @@ function akismet_filter($object, $content, $owner) {
  * @return bool true if spam
  */
 function akismet_scan($comment, $author = "", $author_email = "", $author_url = "", $permlink = "") {
-	$key = elgg_get_plugin_setting('api_key', 'akismet');
+	$key = get_plugin_setting('api_key', 'akismet');
 
 	if (!$key) {
 		throw new ConfigurationException(elgg_echo('akismet:noapikey'));
 	}
 
-	$akismet = new Akismet(elgg_get_site_url(), $key);
+	$site_url = get_config('site')->url;
+	$akismet = new Akismet($site_url, $key);
 	$akismet->setCommentAuthor($author);
 	$akismet->setCommentAuthorEmail($author_email);
 	$akismet->setCommentAuthorURL($author_url);
@@ -71,4 +70,4 @@ function akismet_scan($comment, $author = "", $author_email = "", $author_url = 
 	return $akismet->isCommentSpam();
 }
 
-elgg_register_event_handler('init', 'system', 'akismet_init');
+register_elgg_event_handler('init', 'system', 'akismet_init');
