@@ -5,5 +5,6 @@ add_translation("en", array(
 	'akismet:api_key' => 'API key',
 	'akismet:ban_max_days' => 'Only auto-ban users if their account is younger than this many days',
 	'akismet:spam' => 'You have been banned for spam! Please get in contact with an administrator if you feel this is in error.',
+	'akismet:spam_no_ban' => 'Your content has been rejected because we think it is spam. Please get in contact with an administrator if you feel this is in error.',
 	'akismet:ham' => 'Message passed Akismet spam check',
 ));

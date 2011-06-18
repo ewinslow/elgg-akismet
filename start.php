@@ -43,7 +43,6 @@ function akismet_annotation_handler($event, $type, ElggAnnotation $annotation) {
 
 function akismet_filter($object, $content, $owner) {
 	if (akismet_scan($content, $owner->name, $owner->email, $owner->website, $object->getURL())) {
-		register_error(elgg_echo('akismet:spam'));
 		$object->disable('spam');
 		
 		// only disable the user if older than X days
@@ -56,7 +55,10 @@ function akismet_filter($object, $content, $owner) {
 		$too_old = strtotime("-$ban_max_days days") - $owner->time_created > 0;
 	
 		if (!$too_old) {
+			register_error(elgg_echo('akismet:spam'));
 			$owner->ban('spam');
+		} else {
+			register_error(elgg_echo('akismet:spam_no_ban'));
 		}
 		
 		//bail on the current action + return to previous page seems to make the most sense here...
