@@ -7,6 +7,7 @@ function akismet_init() {
 	require dirname(__FILE__) . "/vendors/akismet/PHP5Akismet.0.4/Akismet.class.php";
 
 	// Only filter if the plugin has been set up and we're not an admin user
+	
 	if (get_plugin_setting('api_key', 'akismet') && !isadminloggedin()) {
 		register_elgg_event_handler('create', 'object', 'akismet_object_handler');
 		register_elgg_event_handler('update', 'user', 'akismet_user_handler');
@@ -17,8 +18,18 @@ function akismet_init() {
 function akismet_user_handler($event, $type, ElggUser $user) {
 	$fields = array($user->briefdescription, $user->description);
 	
-	foreach ($fields as $field) {
-		akismet_filter($user, $field, $user);
+	// we need to check if we're in an action because of updates to last_login, etc
+	// akismet doesn't care about that.
+	$action = get_input('action');
+	$ignored_actions = array(
+		'login',
+		'logout'
+	);
+	
+	if (!in_array($action, $ignored_actions)) {
+		foreach ($fields as $field) {
+			akismet_filter($user, $field, $user);
+		}
 	}
 }
 
@@ -34,7 +45,19 @@ function akismet_filter($object, $content, $owner) {
 	if (akismet_scan($content, $owner->name, $owner->email, $owner->website, $object->getURL())) {
 		register_error(elgg_echo('akismet:spam'));
 		$object->disable('spam');
-		$owner->ban('spam');
+		
+		// only disable the user if older than X days
+		$ban_max_days = $plugin->ban_max_days;
+		
+		if (!$ban_max_days) {
+			$ban_max_days = 7;
+		}
+		
+		$too_old = strtotime("-$ban_max_days days") - $owner->time_created > 0;
+	
+		if (!$too_old) {
+			$owner->ban('spam');
+		}
 		
 		//bail on the current action + return to previous page seems to make the most sense here...
 		forward(REFERER);
