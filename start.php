@@ -43,7 +43,14 @@ function akismet_annotation_handler($event, $type, ElggAnnotation $annotation) {
 
 function akismet_filter($object, $content, $owner) {
 	if (akismet_scan($content, $owner->name, $owner->email, $owner->website, $object->getURL())) {
-		$object->disable('spam');
+		if ($object instanceof ElggEntity) {
+			$object->disable('spam');
+		} elseif ($object instanceof ElggAnnotation) {
+			akismet_disable_annotation($object);
+		} else {
+			// don't know how to deal with this type.
+			return;
+		}
 		
 		// only disable the user if older than X days
 		$ban_max_days = $plugin->ban_max_days;
@@ -93,6 +100,13 @@ function akismet_scan($comment, $author = "", $author_email = "", $author_url = 
 	$akismet->setPermalink($permlink);
 
 	return $akismet->isCommentSpam();
+}
+
+function akismet_disable_annotation($annotation) {
+	$db_prefix = get_config('dbprefix');
+	
+	$q = "UPDATE {$db_prefix}annotations SET enabled = 'no' WHERE id = '$annotation->id'";
+	return update_data($q);
 }
 
 register_elgg_event_handler('init', 'system', 'akismet_init');
